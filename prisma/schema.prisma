@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Worker {
+  id           String    @id @default(cuid())
+  workerCode   String    @unique
+  name         String
+  pinHash      String
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  projects     Project[]
+}
+
+model Project {
+  id                String   @id @default(cuid())
+  projectCode       String   @unique
+  workerId          String
+
+  // PRIVATE - never returned by public APIs
+  customerName      String
+  customerMobile    String
+  fullAddress       String?
+
+  // PUBLIC
+  city              String
+  district          String
+  state             String
+  pincode           String?
+  projectType       String
+  capacityKw        Float
+  panelBrand        String?
+  inverterBrand     String?
+  installationDate  DateTime?
+  completionDate    DateTime?
+  status            String   @default("Completed")
+  description       String?
+  publicImageUrls   String[] @default([])
+  isPublic          Boolean  @default(true)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  worker            Worker   @relation(fields: [workerId], references: [id], onDelete: Restrict)
+  @@index([city])
+  @@index([district])
+  @@index([isPublic, createdAt])
+}
